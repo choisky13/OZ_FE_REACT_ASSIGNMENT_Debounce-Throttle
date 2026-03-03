@@ -1,13 +1,36 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "./App.css";
 
 function App() {
   const [query, setQuery] = useState("");
   const [searchString, setSearchString] = useState("");
 
-  const handleChange = (event) => {
-    setQuery(event.target.value);
-    console.log("검색 쿼리:", event.target.value);
+  const debounceTimer = useRef(null);
+  const throttleTimer = useRef(null);
+
+  const handleDebounceChange = (event) => {
+    const value = event.target.value;
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      setSearchString(value);
+      console.log("Debounce 검색 쿼리:", value);
+    }, 500);
+  };
+
+  const handleThrottleChange = (event) => {
+    const value = event.target.value;
+
+    if (!throttleTimer.current) {
+      throttleTimer.current = setTimeout(() => {
+        setSearchString(value);
+        console.log("Throttle 검색 쿼리:", value);
+        throttleTimer.current = null;
+      }, 1000);
+    }
   };
 
   return (
@@ -22,7 +45,7 @@ function App() {
         <input
           type="text"
           placeholder="Debounce를 이용한 검색..."
-          onChange={handleChange}
+          onChange={handleDebounceChange}
         />
       </div>
       <div>
@@ -30,7 +53,7 @@ function App() {
         <input
           type="text"
           placeholder="Throttle을 이용한 검색..."
-          onChange={handleChange}
+          onChange={handleThrottleChange}
         />
       </div>
       <p>{searchString}</p>
